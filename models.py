@@ -1,4 +1,6 @@
 from database import db, app
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 class Event(db.Model):
     __tablename__ = 'events'
@@ -49,8 +51,21 @@ class User(db.Model):
     orders = db.relationship('Order', backref='user', lazy=True)
     
     
+    def __init__(self, name, email, password):
+        self.name = name
+        self.email = email
+        self.password = generate_password_hash(password, 
+                                                     method='pbkdf2:sha256',
+                                                     salt_length=8)
+        
+    
+    
+    
     def __str__(self):
         return f"User: {self.name}, Email: {self.email}"
+    
+    
+    
 
 
 

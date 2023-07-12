@@ -1,0 +1,14 @@
+.flashes {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.success {
+  color: green;
+}
+
+.danger {
+  color: red;
+}
+

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+    
+        <title>Event Tickecting System</title>
+        <link rel="stylesheet" href=""{{ url_for('static', filename='css/style.css') }}"">
+    </head>
+    <body>
+        <header>
+            <!-- Header content -->
+          </header>
+
+          <nav>
+            <!-- Navigation bar content -->
+          </nav>
+
+          <div class="content">
+            {% block content %}
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+            <li class="{{ message[1] }}">{{ message[0] }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+
+    
+            {% endblock %}
+          </div>
+
+          <footer>
+            <!-- Footer content -->
+          </footer>
+    </body>
+</html>
