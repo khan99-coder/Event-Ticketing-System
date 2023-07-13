@@ -4,19 +4,15 @@ from forms import RegistrationForm, LoginForm
 from models import Event, Ticket, User, Order
 from werkzeug.security import check_password_hash
 from flask_migrate import Migrate
-from flask_jwt import JWT, jwt_required, current_identity
+from event import *
+
+# from flask_jwt import JWT, jwt_required, current_identity
 
 
 
 migrate = Migrate(app, db)
 
 
-
-@app.route('/events')
-def get_events():
-    events = Event.query.all()
-    event_list = [event.to_dict() for event in events]
-    return jsonify(event_list)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -59,7 +55,7 @@ def login():
             # Verify the password
             if check_password_hash(user.password, password):
                 flash('Login successful.', 'success')
-                return redirect(url_for('get_events'))
+                return redirect(url_for('show_events'))
 
         flash('Invalid username or password.', 'danger')
 

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Create Event</h1>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <!-- Rest of the form fields -->
+    <div class="form-group">
+      {{ form.csrf_token }}
+    </div>
+    <div class="form-group">
+      {{ form.title.label }} {{ form.title(class_='form-control') }}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.date.id }}">Date</label>
+      <input type="date" id="{{ form.date.id }}" name="{{ form.date.name }}" value="{{ form.date.data }}" class="form-control">
+    </div>
+    <div class="form-group">
+      {{ form.time.label }} {{ form.time(class_='form-control') }}
+    </div>
+    <div class="form-group">
+      {{ form.location.label }} {{ form.location(class_='form-control') }}
+    </div>
+    <div class="form-group">
+      {{ form.description.label }} {{ form.description(class_='form-control') }}
+    </div>
+    <h3>Tickets</h3>
+    {% for ticket_form in form.tickets %}
+      <div class="form-group">
+        {{ ticket_form.ticket_type.label }} {{ ticket_form.ticket_type(class_='form-control') }}
+      </div>
+      <div class="form-group">
+        {{ ticket_form.price.label }} {{ ticket_form.price(class_='form-control') }}
+      </div>
+      <div class="form-group">
+        {{ ticket_form.quantity.label }} {{ ticket_form.quantity(class_='form-control') }}
+      </div>
+    {% endfor %}
+    <div class="form-group">
+      {{ form.submit(class_='btn btn-primary') }}
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Edit Event</h1>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.title.label }} {{ form.title }}
+    {{ form.date.label }} {{ form.date }}
+    {{ form.time.label }} {{ form.time }}
+    {{ form.location.label }} {{ form.location }}
+    {{ form.description.label }} {{ form.description }}
+    {{ form.ticket_prices.label }} {{ form.ticket_prices }}
+    {{ form.submit }}
+  </form>
+{% endblock %}
+
