@@ -23,6 +23,12 @@ class Event(db.Model):
             'title': self.title,
             'description': self.description
         }
+        
+    def calculate_subtotal(self):
+        subtotal = 0
+        for ticket in self.tickets:
+            subtotal += ticket.price * ticket.quantity
+        return subtotal
 
 
 class Ticket(db.Model):

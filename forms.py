@@ -34,7 +34,7 @@ class EventForm(FlaskForm):
     location = StringField('Location', validators=[DataRequired()])
     description = TextAreaField('Description')
     tickets = FieldList(FormField(TicketForm), min_entries=1)
-    submit = SubmitField('Create Event')
+    submit = SubmitField()
     csrf_token = HiddenField()
 
 
