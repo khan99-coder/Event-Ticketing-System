@@ -3,6 +3,7 @@
 {% block content %}
   <h1>Login</h1>
   <form method="POST">
+    {{ form.csrf_token }}
     {{ form.hidden_tag() }}
     {{ form.username.label }} {{ form.username }}
     {{ form.password.label }} {{ form.password }}

@@ -1,5 +1,11 @@
-from database import db, app
+from flask_sqlalchemy import SQLAlchemy
+
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+
+db = SQLAlchemy()
+
+
 
 
 class Event(db.Model):
@@ -25,6 +31,7 @@ class Event(db.Model):
         }
         
     def calculate_subtotal(self):
+        print(self.tickets)
         subtotal = 0
         for ticket in self.tickets:
             subtotal += ticket.price * ticket.quantity
@@ -47,7 +54,7 @@ class Ticket(db.Model):
 
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -70,8 +77,6 @@ class User(db.Model):
     def __str__(self):
         return f"User: {self.name}, Email: {self.email}"
     
-    
-    
 
 
 
@@ -90,5 +95,5 @@ class Order(db.Model):
         return f"Order ID: {self.id}, User: {self.user.name}, Ticket: {self.ticket.ticket_type}, Quantity: {self.quantity}"
 
 
-with app.app_context():
-    db.create_all()
+# class Vengeance():
+#     pass
