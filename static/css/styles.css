@@ -1,0 +1,62 @@
+.flashes {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.success {
+  color: green;
+}
+
+.danger {
+  color: red;
+}
+
+/* Custom styles for the event-details and ticket-details sections */
+.event-details {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.ticket-details {
+  margin-top: 20px;
+}
+
+/* Custom style for the "BUY TICKETS" button */
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  position: absolute; /* Add this line to position the button absolutely within the event-details div */
+  top: 10px; /* Adjust top and right values to position the button correctly */
+  right: 10px;
+}
+
+/* Custom style for the table */
+table {
+  width: 100%;
+}
+
+th, td {
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background-color: #f0f0f0;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Custom style for the input box */
+input[type="number"] {
+  width: 50px;
+}

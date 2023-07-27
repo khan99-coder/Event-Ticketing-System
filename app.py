@@ -12,7 +12,7 @@ from flask_wtf.csrf import CSRFProtect
 
 from forms import EventForm
 import re
-import traceback
+from unicodedata import normalize
 
 
 csrf = CSRFProtect()
@@ -122,8 +122,11 @@ def admin_only(f):
 
 def slugify(text):
     # Remove special characters and convert spaces to hyphens
-    text = re.sub(r'[^a-zA-Z0-9\s]', '', text).strip().lower()
-    text = re.sub(r'\s+', '-', text)
+    text = re.sub(r'[^\w\s-]', '', text).strip().lower()
+    text = re.sub(r'[-\s]+', '-', text)
+
+    # Normalize the text to handle accented characters
+    text = normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
 
     return text
 
@@ -194,6 +197,9 @@ def get_event(event_id):
     
     # Generate the slug
     slug = slugify(event.title)
+    
+    print(f"Event Title: {event.title}")
+    print(f"Generated Slug: {slug}")
 
     # Generate the URL pattern
     url_pattern = f"/events/{event_id}/{slug}"

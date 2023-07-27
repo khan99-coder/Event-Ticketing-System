@@ -1,46 +1,72 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>{{ event.title }}</h1>
-  <p><strong>Description:</strong> {{ event.description }}</p>
-  <p><strong>Date:</strong> {{ event.date }}</p>
-  <p><strong>Time:</strong> {{ event.time }}</p>
-  <p><strong>Location:</strong> {{ event.location }}</p>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
-  <h2>Ticket Details</h2>
-  {% for ticket in event.tickets %}
-    <div>
-      <p><strong>Ticket Type:</strong> {{ ticket.ticket_type }}</p>
-      <p><strong>Quantity:</strong> {{ ticket.quantity }}</p>
-      <p><strong>Price per Ticket:</strong> {{ ticket.price }}</p>
-    </div>
-  {% endfor %}
+  <div class="event-details">
+    <h1>{{ event.title }}</h1>
+    <p><strong>Description:</strong> {{ event.description }}</p>
+    <p><strong>Date:</strong> {{ event.date }}</p>
+    <p><strong>Time:</strong> {{ event.time }}</p>
+    <p><strong>Location:</strong> {{ event.location }}</p>
+    <button class="btn btn-primary">BUY TICKETS</button>
+  </div>
 
-  <h2>Subtotal</h2>
-  <p>
-    <strong>Subtotal:</strong> {{ event.calculate_subtotal() }}
-  </p>
-
-  <form method="POST" action="/create_event">
-    {{ form.csrf_token }}
-    <button type="submit" class="btn btn-primary">Calculate Subtotal</button>
-  </form>
-
-   <!-- Add the "Delete Event" button -->
+  <div class="ticket-details">
+    <h2>Ticket Details</h2>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Unit Cost</th>
+          <th>Count</th>
+          <th>Sub Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in event.tickets %}
+          <tr>
+            <td>{{ ticket.ticket_type }}</td>
+            <td>{{ ticket.price }}</td>
+            <td>
+              <!-- Input box to select ticket quantity -->
+              <input type="number" name="ticket_quantity" min="0" max="10" value="0" onchange="calculateSubtotal(this, {{ ticket.price }})" />
+            </td>
+            <td>
+              <span id="subtotal_{{ ticket.ticket_type }}">Kshs 0.00</span>
+            </td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td colspan="2"></td>
+          <td>TOTAL ITEMS</td>
+          <td id="total_items_subtotal">Kshs 0.00</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
   
-   <form method="DELETE" action="{{ url_for('delete_event', event_id=event.id) }}">
-     {{ form.csrf_token }}
-     <input type="hidden" name="_method" value="DELETE">
-     <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete Event</button>
-   </form>
 
-   <script>
-    function confirmDelete() {
-      if (confirm("Are you sure you want to delete this event?")) {
-        document.getElementById("delete-form").submit();
-      }
+  <!-- Rest of the content and scripts if any -->
+
+  <script>
+    function calculateSubtotal(input, unitCost) {
+      const count = input.value;
+      const subtotal = count * unitCost;
+      const ticketType = input.closest('tr').querySelector('td:first-child').innerText;
+      const subtotalElement = document.getElementById(`subtotal_${ticketType}`);
+      subtotalElement.innerText = `Kshs ${subtotal.toFixed(2)}`;
+      updateTotalSubtotal();
+    }
+
+    function updateTotalSubtotal() {
+      const subtotals = document.querySelectorAll('[id^="subtotal_"]');
+      let totalSubtotal = 0;
+      subtotals.forEach(subtotal => {
+        totalSubtotal += parseFloat(subtotal.innerText.replace('Kshs ', ''));
+      });
+      const totalSubtotalElement = document.getElementById('total_items_subtotal');
+      totalSubtotalElement.innerText = `Kshs ${totalSubtotal.toFixed(2)}`;
     }
   </script>
-
 {% endblock %}
-
