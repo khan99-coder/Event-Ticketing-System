@@ -33,8 +33,13 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  position: absolute; /* Add this line to position the button absolutely within the event-details div */
-  top: 10px; /* Adjust top and right values to position the button correctly */
+ 
+}
+
+/* Position the "BUY TICKETS" button at the upper right corner of the event details */
+#buy-tickets-btn {
+  position: absolute;
+  top: 10px;
   right: 10px;
 }
 
@@ -60,3 +65,52 @@ tr:nth-child(even) {
 input[type="number"] {
   width: 50px;
 }
+
+
+/* Custom styles for the user-details section */
+.user-details {
+  margin-top: 20px;
+  text-align: center;
+  margin-bottom: 20px; /* Add some margin at the bottom to create space between user-details and the button */
+}
+
+/* Custom style for the input boxes in the user-details form */
+.user-details input[type="text"],
+.user-details input[type="email"],
+.user-details input[type="tel"] {
+  width: 200px; /* Set the width of the input fields as per your requirement */
+  margin: 5px; /* Add some spacing between the input fields */
+}
+
+/* Custom styles for the "PROCEED TO PAY" button */
+.proceed-btn {
+  margin-top: 20px;
+  background-color: #ff4444;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Custom style to center align the "PROCEED TO PAY" button */
+.proceed-btn-container {
+  display: flex;
+  justify-content: center;
+}
+
+/* Style for the active state of the "PROCEED TO PAY" button */
+.proceed-btn.active {
+  background-color: red; /* Change the background color to a brighter red when active */
+}
+
+
+
+
+
+
+
+
+
+

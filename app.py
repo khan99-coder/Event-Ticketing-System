@@ -132,7 +132,7 @@ def slugify(text):
 
 
 @app.route('/events')
-@login_required
+# @login_required
 def show_events():
     events = Event.query.all()
     return render_template('events.html', events=events)
