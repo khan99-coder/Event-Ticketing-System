@@ -18,6 +18,7 @@ class Event(db.Model):
     time = db.Column(db.Time, nullable=False)
     location = db.Column(db.String(100), nullable=False)
     tickets = db.relationship('Ticket', backref='event', lazy=True)
+    image_url = db.Column(db.String(200), nullable=True)
     
     
     def __str__(self):
