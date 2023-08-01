@@ -65,13 +65,13 @@
         <div class="row mb-3">
           <label for="colFormLabel" class="col-sm-2 col-form-label">Name: </label>
           <div class="col-sm-10">
-            <input type="text" name="name" class="form-control" id="name" placeholder="Name">
+            <input type="text" name="name" class="form-control" id="name" placeholder="Name" value="{{ current_user.name }}" >
           </div>
         </div>
         <div class="row mb-3">
           <label for="colFormLabel" class="col-sm-2 col-form-label">Email: </label>
           <div class="col-sm-10">
-            <input type="email" name="email" class="form-control" id="email" placeholder="Email" required>
+            <input type="email" name="email" class="form-control" id="email" placeholder="Email" value="{{ current_user.email }}" >
           </div>
         </div>
         <div class="row mb-3">
@@ -83,11 +83,58 @@
       </form>
     </div>
   </div>
+  <script>
+  // Set the name and email as placeholders on hover
+  document.addEventListener('DOMContentLoaded', () => {
+    const nameInput = document.querySelector('input[name="name"]');
+    const emailInput = document.querySelector('input[name="email"]');
+
+    nameInput.addEventListener('mouseenter', () => {
+      if (!nameInput.value) {
+        nameInput.placeholder = "{{ current_user.name }}";
+      }
+    });
+
+    emailInput.addEventListener('mouseenter', () => {
+      if (!emailInput.value) {
+        emailInput.placeholder = "{{ current_user.email }}";
+      }
+    });
+
+    nameInput.addEventListener('mouseleave', () => {
+      nameInput.placeholder = "Name";
+    });
+
+    emailInput.addEventListener('mouseleave', () => {
+      emailInput.placeholder = "Email";
+    });
+  });
+
+  // Set the name and email when the user clicks on the input fields
+  document.addEventListener('focus', (event) => {
+    const target = event.target;
+    if (target.tagName.toLowerCase() === 'input' && !target.value) {
+      if (target.name === 'name') {
+        target.value = "{{ current_user.name }}";
+      } else if (target.name === 'email') {
+        target.value = "{{ current_user.email }}";
+      }
+    }
+  }, true);
+
+  // Submit the form when clicking "Enter" on the phone input field
+  document.getElementById('colFormLabel').addEventListener('keyup', function(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      document.getElementById('user-details-form').submit();
+    }
+  });
+</script>
 
   <div class="proceed-btn-container mb-3">
     <button class="btn btn-danger proceed-btn" id="proceed-to-pay-btn" disabled onclick="submitForm()">PROCEED TO PAY</button>
   </div>
-  <!-- Rest of the content and scripts if any -->
+
 
   <script>
     function calculateSubtotal(input, unitCost) {
@@ -207,6 +254,8 @@
     
       form.submit();
     }
+
+    
     
   </script>
 {% endblock %}
