@@ -30,7 +30,10 @@
             <td>{{ ticket.price }}</td>
             <td>
               <!-- Input box to select ticket quantity -->
-              <input type="number" name="ticket_quantity" min="0" max="10" value="0" onchange="calculateSubtotal(this, {{ ticket.price }})" />
+              <input type="number" name="ticket_quantity_" min="0" max="10" value="0" 
+              data-ticket-id="{{ ticket.id }}"
+              data-ticket-price="{{ ticket.price }}"
+              onchange="calculateSubtotal(this, {{ ticket.price }})" />
             </td>
             <td>
               <span id="subtotal_{{ ticket.ticket_type }}">Kshs 0.00</span>
@@ -49,33 +52,89 @@
   <div class="container text-center">
     <div class="user-details d-flex flex-column align-items-center">
       <h2>Enter Your Details</h2>
-      <form class="d-flex flex-column align-items-center">
+      <form id="user-details-form" class="d-flex flex-column align-items-center"  action="{{ url_for('checkout') }}" method="post">
+        <!-- The CSRF token for preventing cross-site request forgery -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="ticket_quantity" value="" id="ticket-quantity-hidden">
+
+
+        <!-- Hidden input fields for Ticket ID and Ticket Price -->
+        <input type="hidden" name="ticket_id" value="">
+        <input type="hidden" name="ticket_price" value="">
+
         <div class="row mb-3">
           <label for="colFormLabel" class="col-sm-2 col-form-label">Name: </label>
           <div class="col-sm-10">
-            <input type="name" class="form-control" id="colFormLabel" placeholder="Name">
+            <input type="text" name="name" class="form-control" id="name" placeholder="Name" value="{{ current_user.name }}" >
           </div>
         </div>
         <div class="row mb-3">
           <label for="colFormLabel" class="col-sm-2 col-form-label">Email: </label>
           <div class="col-sm-10">
-            <input type="email" class="form-control" id="colFormLabel" placeholder="Email">
+            <input type="email" name="email" class="form-control" id="email" placeholder="Email" value="{{ current_user.email }}" >
           </div>
         </div>
         <div class="row mb-3">
           <label for="colFormLabel" class="col-sm-2 col-form-label">Phone: </label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" id="colFormLabel" placeholder="Phone number">
+            <input type="text" name="phone" class="form-control" id="phoneNumber" placeholder="Phone number">
           </div>
         </div>
       </form>
     </div>
   </div>
+  <script>
+  // Set the name and email as placeholders on hover
+  document.addEventListener('DOMContentLoaded', () => {
+    const nameInput = document.querySelector('input[name="name"]');
+    const emailInput = document.querySelector('input[name="email"]');
+
+    nameInput.addEventListener('mouseenter', () => {
+      if (!nameInput.value) {
+        nameInput.placeholder = "{{ current_user.name }}";
+      }
+    });
+
+    emailInput.addEventListener('mouseenter', () => {
+      if (!emailInput.value) {
+        emailInput.placeholder = "{{ current_user.email }}";
+      }
+    });
+
+    nameInput.addEventListener('mouseleave', () => {
+      nameInput.placeholder = "Name";
+    });
+
+    emailInput.addEventListener('mouseleave', () => {
+      emailInput.placeholder = "Email";
+    });
+  });
+
+  // Set the name and email when the user clicks on the input fields
+  document.addEventListener('focus', (event) => {
+    const target = event.target;
+    if (target.tagName.toLowerCase() === 'input' && !target.value) {
+      if (target.name === 'name') {
+        target.value = "{{ current_user.name }}";
+      } else if (target.name === 'email') {
+        target.value = "{{ current_user.email }}";
+      }
+    }
+  }, true);
+
+  // Submit the form when clicking "Enter" on the phone input field
+  document.getElementById('colFormLabel').addEventListener('keyup', function(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      document.getElementById('user-details-form').submit();
+    }
+  });
+</script>
 
   <div class="proceed-btn-container mb-3">
-    <button class="btn btn-danger proceed-btn" id="proceed-to-pay-btn" disabled>PROCEED TO PAY</button>
+    <button class="btn btn-danger proceed-btn" id="proceed-to-pay-btn" disabled onclick="submitForm()">PROCEED TO PAY</button>
   </div>
-  <!-- Rest of the content and scripts if any -->
+
 
   <script>
     function calculateSubtotal(input, unitCost) {
@@ -83,8 +142,17 @@
       const subtotal = count * unitCost;
       const ticketType = input.closest('tr').querySelector('td:first-child').innerText;
       const subtotalElement = document.getElementById(`subtotal_${ticketType}`);
+      const ticketId = input.getAttribute('data-ticket-id');
+      const ticketPrice = input.getAttribute('data-ticket-price');
+      console.log(ticketId, ticketPrice); // Add this line for debugging
       subtotalElement.innerText = `Kshs ${subtotal.toFixed(2)}`;
       updateTotalSubtotal();
+
+      // Set the Ticket ID and Ticket Price in the hidden input fields
+    document.querySelector('input[name="ticket_id"]').value = ticketId;
+    document.querySelector('input[name="ticket_price"]').value = ticketPrice;
+     // Update the selected ticket quantity to the hidden input field
+    document.getElementById('ticket-quantity-hidden').value = count;
     }
 
     function updateTotalSubtotal() {
@@ -107,25 +175,25 @@
     
     // Check if both ticket count and user details are filled before enabling the "PROCEED TO PAY" button
     const proceedToPayBtn = document.getElementById('proceed-to-pay-btn');
-    const ticketInputs = document.querySelectorAll('input[name="ticket_quantity"]');
+    const ticketInputs = document.querySelectorAll('input[name^="ticket_quantity_"]');
     const userDetailsInputs = document.querySelectorAll('.user-details input');
 
     function checkProceedButtonState() {
       let countFilled = false;
       let userDetailsFilled = true;
-
+    
       ticketInputs.forEach(input => {
         if (parseInt(input.value) > 0) {
           countFilled = true;
         }
       });
-
+    
       userDetailsInputs.forEach(input => {
         if (input.value.trim() === '') {
           userDetailsFilled = false;
         }
       });
-
+    
       if (countFilled && userDetailsFilled) {
         proceedToPayBtn.removeAttribute('disabled');
         proceedToPayBtn.classList.add('active');
@@ -147,6 +215,48 @@
 
     // Call the function once after the page loads
     document.addEventListener('DOMContentLoaded', checkProceedButtonState);
+    
+    function submitForm() {
+      const form = document.getElementById('user-details-form');
+    
+      // Get the CSRF token value from the hidden input field
+      const csrfToken = form.querySelector('input[name="csrf_token"]').value;
+    
+      // Get the selected ticket quantity
+      const selectedTicketInput = document.querySelector('input[name^="ticket_quantity_"]:checked');
+      const ticketQuantity = selectedTicketInput ? selectedTicketInput.value : null;
+    
+      // Update the hidden input fields with ticket details
+      const ticketIdInput = document.createElement('input');
+      ticketIdInput.type = 'hidden';
+      ticketIdInput.name = 'ticket_id';
+      ticketIdInput.value = selectedTicketInput ? selectedTicketInput.getAttribute('data-ticket-id') : '';
+      form.appendChild(ticketIdInput);
+    
+      const ticketPriceInput = document.createElement('input');
+      ticketPriceInput.type = 'hidden';
+      ticketPriceInput.name = 'ticket_price';
+      ticketPriceInput.value = selectedTicketInput ? selectedTicketInput.getAttribute('data-ticket-price') : '';
+      form.appendChild(ticketPriceInput);
+    
+      const ticketQuantityInput = document.createElement('input');
+      ticketQuantityInput.type = 'hidden';
+      ticketQuantityInput.name = 'ticket_quantity';
+      ticketQuantityInput.value = ticketQuantity !== null ? ticketQuantity : '';
+      form.appendChild(ticketQuantityInput);
+    
+      // Add the CSRF token to the form submission
+      const csrfTokenInput = document.createElement('input');
+      csrfTokenInput.type = 'hidden';
+      csrfTokenInput.name = 'csrf_token';
+      csrfTokenInput.value = csrfToken;
+      form.appendChild(csrfTokenInput);
+    
+      form.submit();
+    }
+
+    
+    
   </script>
 {% endblock %}
 

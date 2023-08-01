@@ -1,14 +1,17 @@
-from flask import Flask, abort, jsonify, flash, redirect, url_for, render_template, make_response, jsonify, request
+from flask import (Flask, abort, jsonify, flash, redirect, url_for, 
+                   render_template, make_response, jsonify, request)
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from forms import RegistrationForm, LoginForm
-from models import User, Event, Ticket, db
+from models import User, Event, Ticket, db, Order
 from werkzeug.security import check_password_hash
 from flask_migrate import Migrate
 from functools import wraps
 from flask_sqlalchemy import SQLAlchemy 
 from flask.cli import with_appcontext
 from config import DevelopmentConfig
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, generate_csrf
+from datetime import datetime
+
 
 from forms import EventForm
 import re
@@ -189,6 +192,7 @@ def create_event():
         
 
 @app.route('/events/<int:event_id>')
+@login_required
 def get_event(event_id):
     # Retrieve the event by ID
     event = Event.query.get_or_404(event_id)
@@ -203,8 +207,10 @@ def get_event(event_id):
 
     # Generate the URL pattern
     url_pattern = f"/events/{event_id}/{slug}"
+    # Generate CSRF token and pass it to the template
+    csrf_token = generate_csrf()
 
-    return render_template('event_detail.html', event=event, 
+    return render_template('event_detail.html', event=event, csrf_token=csrf_token, 
                            url_pattern=url_pattern, form=form)
 
 
@@ -250,7 +256,64 @@ def delete_event(event_id):
     return redirect(url_for('show_events'))
 
 
+@app.route('/checkout', methods=['POST'])
+def checkout():
+    if current_user.is_authenticated:
+        name = current_user.name
+        email = current_user.email
+        phone = request.form.get('phone')
 
+        # Get the ticket ID and price from the form submission
+        ticket_id = request.form.get('ticket_id')
+        ticket_price = request.form.get('ticket_price')
+        print(f"name: {name}, email: {email}, phone: {phone}")
+
+        # Check if the ticket_id and ticket_price are not None before converting to int/float
+        if ticket_id is not None and ticket_price is not None:
+            ticket_id = int(ticket_id)
+            ticket_price = float(ticket_price)
+        else:
+            # Handle the case when the ticket_id or ticket_price is missing
+            return "Error: Ticket ID or Ticket Price is missing."
+
+        # Check if the ticket_quantity is provided in the form data
+        ticket_quantity = request.form.get("ticket_quantity")
+        print("ticket quantity", ticket_quantity)
+        if ticket_quantity is not None:
+            quantity = int(ticket_quantity)
+        else:
+            # Handle the case when ticket_quantity is missing
+            return "Error: Ticket Quantity is missing."
+
+        # Calculate total amount based on the quantity of tickets selected
+        total_amount = quantity * ticket_price
+
+        # Create an Order object and save it to the database
+        order_date = datetime.now()
+        order = Order(user_id=current_user.id, ticket_id=ticket_id, quantity=quantity, order_date=order_date, total_amount=total_amount)
+        db.session.add(order)
+        db.session.commit()
+
+        # Redirect the user to the checkout success page and pass the form data and order details
+        return redirect(url_for('checkout_success', name=name, email=email, phone=phone, 
+                                ticket_quantity=quantity, total_amount=total_amount))
+    else:
+        # The user is not logged in, redirect them to the login page
+        return redirect(url_for('login'))
+
+
+@app.route('/checkout/success')
+def checkout_success():
+    # Retrieve the form data and order details from the query parameters
+    name = request.args.get('name')
+    email = request.args.get('email')
+    phone = request.args.get('phone')
+    ticket_quantity = request.args.get('ticket_quantity')
+    total_amount = request.args.get('total_amount')
+
+    # Render the checkout success template and pass the form data and order details to it
+    return render_template('checkout_success.html', name=name, email=email, phone=phone, 
+                           ticket_quantity=ticket_quantity, total_amount=total_amount)
 
 
 
